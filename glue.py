@@ -25,4 +25,19 @@ spark_df = sparkSession.read.format("jdbc")\
 print("Count of users in table",spark_df.count()) #This will give count of table in Database
 print("Schema of the Table: ",spark_df.printSchema()) #This will print schema of that table
 
+#Convert spark DF to Dynamic DF and writes to S3
+dynamic_df = DynamicFrame.fromDF(
+    spark_df,
+    glueContext,
+    "convert_ctx"
+)
+
+#Write Data to S3 in Parquet Format
+glueContext.write_dynamic_frame.from_options(
+    frame = dynamic_df,
+    connection_type = "s3",
+    connection_options = {"path:":"s3path"},
+    format= "parquet",
+    transformation_ctx = "transformation_ctx"
+)
 glueJob.commit()
